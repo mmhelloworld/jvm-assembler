@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
@@ -29,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.Dup.class, name = "Dup"),
     @JsonSubTypes.Type(value = Asm.Field.class, name = "Field"),
     @JsonSubTypes.Type(value = Asm.Frame.class, name = "Frame"),
-    @JsonSubTypes.Type(value = Asm.GetType.class, name = "GetType"),
     @JsonSubTypes.Type(value = Asm.Goto.class, name = "Goto"),
     @JsonSubTypes.Type(value = Asm.I2c.class, name = "I2c"),
     @JsonSubTypes.Type(value = Asm.I2l.class, name = "I2l"),
@@ -87,7 +85,6 @@ public abstract class Asm {
         Dup,
         Field,
         Frame,
-        GetType,
         Goto,
         I2c,
         I2l,
@@ -586,7 +583,6 @@ public abstract class Asm {
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -718,18 +714,6 @@ public abstract class Asm {
         }
     }
 
-    public static class GetType {
-        private final String desc;
-
-        public GetType(@JsonProperty("desc") final String desc) {
-            this.desc = desc;
-        }
-
-        public String getDesc() {
-            return desc;
-        }
-    }
-
     public static final class Handle {
         private final int tag;
         private final String cname;
@@ -770,7 +754,6 @@ public abstract class Asm {
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
