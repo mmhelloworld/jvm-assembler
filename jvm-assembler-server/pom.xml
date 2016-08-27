@@ -10,24 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jvm-assembler-server</artifactId>
-    <packaging>war</packaging>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <warName>jvm-assembler-core</warName>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
 
