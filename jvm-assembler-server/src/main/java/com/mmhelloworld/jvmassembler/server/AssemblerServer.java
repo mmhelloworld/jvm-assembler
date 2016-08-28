@@ -54,9 +54,9 @@ public class AssemblerServer {
 
     private static void writePort(final int port) {
         final File portInfoFile = getInfoFile();
-        getWorkingDir().mkdir();
         try (BufferedWriter out = new BufferedWriter(new FileWriter(portInfoFile))) {
-            out.append(Integer.toString(port));
+            out.append(Integer.toString(port)).append('\n');
+            out.flush();
         } catch (IOException e) {
             System.err.println("Cannot write port details to " + portInfoFile);
             e.printStackTrace();
@@ -77,8 +77,9 @@ public class AssemblerServer {
     }
 
     private static File getInfoFile() {
-        File idrisjvmWorkDir = getWorkingDir();
-        return new File(idrisjvmWorkDir, ".assembler");
+        File workingDir = getWorkingDir();
+        getWorkingDir().mkdir();
+        return new File(workingDir, ".assembler");
     }
 
     private static int parseIntWithDefault(String portStr, int dflt) {
@@ -91,7 +92,7 @@ public class AssemblerServer {
 
     private static File getWorkingDir() {
         final String userHome = System.getProperty("user.home");
-        return new File(userHome, ".idrisjvm");
+        return new File(userHome, ".jvm-assembler");
     }
 
     private static int getPort(final Server jettyServer) {
