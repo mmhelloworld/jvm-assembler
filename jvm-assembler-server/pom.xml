@@ -30,7 +30,7 @@
                     <programs>
                         <program>
                             <mainClass>com.mmhelloworld.jvmassembler.server.AssemblerServer</mainClass>
-                            <id>idrisjasm</id>
+                            <id>jvmasm</id>
                             <jvmSettings>
                                 <maxMemorySize>750m</maxMemorySize>
                             </jvmSettings>
@@ -104,6 +104,11 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
         </dependency>
 
         <dependency>

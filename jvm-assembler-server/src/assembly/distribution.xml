@@ -13,8 +13,13 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/appassembler</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>${project.build.directory}/appassembler/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/appassembler/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
         </fileSet>
     </fileSets>
 </assembly>

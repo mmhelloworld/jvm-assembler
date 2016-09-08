@@ -17,6 +17,7 @@
         <jackson.version>2.8.1</jackson.version>
         <jetty.version>9.3.11.v20160721</jetty.version>
         <asm.version>5.1</asm.version>
+        <joptsimple.version>5.0.2</joptsimple.version>
     </properties>
 
     <build>
@@ -96,6 +97,13 @@
                 <artifactId>asm-all</artifactId>
                 <version>${asm.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>net.sf.jopt-simple</groupId>
+                <artifactId>jopt-simple</artifactId>
+                <version>${joptsimple.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

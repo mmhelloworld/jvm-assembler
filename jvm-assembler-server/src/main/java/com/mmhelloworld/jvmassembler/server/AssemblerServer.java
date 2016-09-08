@@ -1,5 +1,8 @@
 package com.mmhelloworld.jvmassembler.server;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -10,24 +13,24 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.Scanner;
 
-public class AssemblerServer {
-    public static void main(String[] args) throws Exception {
-        int alreadyRunningPort = readPort();
-        if (alreadyRunningPort >= 0) {
-            System.err.printf("A server may be already running on port %d.\n", alreadyRunningPort);
-            System.out.println("Do you want to force start a new server? (y/n)");
-            final Scanner in = new Scanner(System.in);
-            if (in.hasNext() && !in.nextLine().equalsIgnoreCase("y")) {
-                System.exit(0);
-            }
-        }
-        startServer();
+public final class AssemblerServer {
+
+    private final int port;
+    private final File workingDir;
+
+    public AssemblerServer(int port, File workingDir) {
+        this.port = port;
+        this.workingDir = workingDir;
     }
 
-    private static void startServer() throws Exception {
+    public void start() {
+        workingDir.mkdirs();
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
 
@@ -35,24 +38,24 @@ public class AssemblerServer {
         jerseyServlet.setInitOrder(0);
         jerseyServlet.setInitParameter("javax.ws.rs.Application", AssemblerApp.class.getCanonicalName());
 
-        Server jettyServer = new Server(0);
+        Server jettyServer = new Server(port);
         jettyServer.setHandler(context);
 
         try {
             jettyServer.start();
-            int port = getPort(jettyServer);
-            System.out.printf("Server started successfully and is running on port %s.\n", port);
-            writePort(port);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                getInfoFile().delete();
-            }));
+            int runningPort = getPort(jettyServer);
+            System.out.printf("Server started successfully and is running on port %s.\n", runningPort);
+            writePort(runningPort);
+            Runtime.getRuntime().addShutdownHook(new Thread(getInfoFile()::delete));
             jettyServer.join();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             jettyServer.destroy();
         }
     }
 
-    private static void writePort(final int port) {
+    private void writePort(int port) {
         final File portInfoFile = getInfoFile();
         try (BufferedWriter out = new BufferedWriter(new FileWriter(portInfoFile))) {
             out.append(Integer.toString(port)).append('\n');
@@ -63,40 +66,83 @@ public class AssemblerServer {
         }
     }
 
-    private static int readPort() throws IOException {
-        final File portInfoFile = getInfoFile();
-        if (portInfoFile.exists()) {
-            return Files.lines(portInfoFile.toPath())
-            .findFirst()
-            .map(s -> parseIntWithDefault(s, -1))
-            .orElse(-1);
-        } else {
-            return -1;
-        }
-
+    public Optional<Integer> getPort() {
+        return Optional.of(getInfoFile())
+            .filter(File::exists)
+            .flatMap(f -> {
+                try {
+                    return Files.lines(f.toPath())
+                        .findFirst()
+                        .flatMap(AssemblerServer::parseInt)
+                        .filter(this::isRunning);
+                } catch (IOException e) {
+                    return Optional.empty();
+                }
+            });
     }
 
-    private static File getInfoFile() {
-        File workingDir = getWorkingDir();
-        getWorkingDir().mkdir();
+    private boolean isRunning(int port) {
+        final String url = String.format("http://localhost:%d/assembler/health", port);
+        try (InputStream ignored = new URL(url).openStream()) {
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private File getInfoFile() {
         return new File(workingDir, ".assembler");
     }
 
-    private static int parseIntWithDefault(String portStr, int dflt) {
+    private static Optional<Integer> parseInt(String portStr) {
         try {
-            return Integer.parseInt(portStr);
+            return Optional.of(Integer.parseInt(portStr));
         } catch (NumberFormatException e) {
-            return dflt;
+            return Optional.empty();
         }
     }
 
-    private static File getWorkingDir() {
+    private static File getDefaultWorkingDir() {
         final String userHome = System.getProperty("user.home");
         return new File(userHome, ".jvm-assembler");
     }
 
     private static int getPort(final Server jettyServer) {
         return ((ServerConnector) (jettyServer.getConnectors()[0])).getLocalPort();
+    }
+
+    public static void start(final String[] args) {
+        OptionParser parser = new OptionParser();
+        OptionSpec<File> workDirOpt = parser.accepts("work-dir")
+            .withOptionalArg()
+            .ofType(File.class)
+            .defaultsTo(getDefaultWorkingDir());
+        OptionSpec<Integer> portOpt = parser.accepts("port")
+            .withOptionalArg()
+            .ofType(Integer.class)
+            .defaultsTo(0);
+
+        OptionSet options = parser.parse(args);
+
+        AssemblerServer server = new AssemblerServer(portOpt.value(options), workDirOpt.value(options));
+
+        final Optional<Integer> runningPort = server.getPort();
+        boolean isRunningAlready = runningPort.isPresent();
+        final boolean shouldStart = !isRunningAlready ||
+            runningPort.filter(port -> {
+                System.err.printf("A server may be already running on port %d.%n", port);
+                System.out.println("Do you really want to start a new server? (y/n)");
+                final Scanner in = new Scanner(System.in);
+                return in.hasNext() && in.nextLine().equalsIgnoreCase("y");
+            }).isPresent();
+
+        if (shouldStart) {
+            server.start();
+        }
+    }
+
+    public static void main(String[] args) {
+        start(args);
     }
 
 }
