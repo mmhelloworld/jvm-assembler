@@ -46,7 +46,6 @@ public final class AssemblerServer {
             int runningPort = getPort(jettyServer);
             System.out.printf("Server started successfully and is running on port %s.\n", runningPort);
             writePort(runningPort);
-            Runtime.getRuntime().addShutdownHook(new Thread(getInfoFile()::delete));
             jettyServer.join();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -112,33 +111,53 @@ public final class AssemblerServer {
     }
 
     public static void start(final String[] args) {
+        Config config = getConfig(args);
+        AssemblerServer server = new AssemblerServer(config.getPort(), config.getWorkingDir());
+
+        server.getPort()
+            .map(port -> {
+                System.out.printf("A server may be already running on port %d.%n", port);
+                if (shouldForceStart(config)) {
+                    server.start();
+                } else {
+                    System.err.println("Use option --force to force start a new server.");
+                }
+                return false; //ignored
+            })
+            .orElseGet(() -> {
+                server.start();
+                return false; // ignored
+            });
+    }
+
+    private static boolean shouldForceStart(Config config) {
+        return config.isForceStart() || (config.isInteractive() && userToStartAnother());
+    }
+
+    private static Config getConfig(final String[] args) {
         OptionParser parser = new OptionParser();
         OptionSpec<File> workDirOpt = parser.accepts("work-dir")
             .withOptionalArg()
             .ofType(File.class)
             .defaultsTo(getDefaultWorkingDir());
+
         OptionSpec<Integer> portOpt = parser.accepts("port")
             .withOptionalArg()
             .ofType(Integer.class)
             .defaultsTo(0);
 
+        parser.accepts("non-interactive").withOptionalArg();
+        parser.accepts("force").withOptionalArg();
+
         OptionSet options = parser.parse(args);
+        return new Config(portOpt.value(options), workDirOpt.value(options), !options.has("non-interactive"),
+            options.has("force"));
+    }
 
-        AssemblerServer server = new AssemblerServer(portOpt.value(options), workDirOpt.value(options));
-
-        final Optional<Integer> runningPort = server.getPort();
-        boolean isRunningAlready = runningPort.isPresent();
-        final boolean shouldStart = !isRunningAlready ||
-            runningPort.filter(port -> {
-                System.err.printf("A server may be already running on port %d.%n", port);
-                System.out.println("Do you really want to start a new server? (y/n)");
-                final Scanner in = new Scanner(System.in);
-                return in.hasNext() && in.nextLine().equalsIgnoreCase("y");
-            }).isPresent();
-
-        if (shouldStart) {
-            server.start();
-        }
+    private static boolean userToStartAnother() {
+        System.out.print("Do you really want to start a new server? (y/n): ");
+        final Scanner in = new Scanner(System.in);
+        return in.hasNext() && in.nextLine().equalsIgnoreCase("y");
     }
 
     public static void main(String[] args) {
