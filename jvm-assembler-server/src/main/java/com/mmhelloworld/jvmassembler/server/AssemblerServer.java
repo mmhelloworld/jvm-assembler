@@ -1,5 +1,6 @@
 package com.mmhelloworld.jvmassembler.server;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -138,20 +139,41 @@ public final class AssemblerServer {
         OptionParser parser = new OptionParser();
         OptionSpec<File> workDirOpt = parser.accepts("work-dir")
             .withOptionalArg()
+            .describedAs("Working directory")
             .ofType(File.class)
             .defaultsTo(getDefaultWorkingDir());
 
         OptionSpec<Integer> portOpt = parser.accepts("port")
             .withOptionalArg()
+            .describedAs("Server port; Pass 0 to select a random port")
             .ofType(Integer.class)
             .defaultsTo(0);
 
-        parser.accepts("non-interactive").withOptionalArg();
-        parser.accepts("force").withOptionalArg();
+        parser.accepts("non-interactive")
+            .withOptionalArg()
+            .describedAs("No user input");
+        parser.accepts("force")
+            .withOptionalArg()
+            .describedAs("Force start a new server in case a server is already running");
+        parser.accepts("help").forHelp();
 
-        OptionSet options = parser.parse(args);
-        return new Config(portOpt.value(options), workDirOpt.value(options), !options.has("non-interactive"),
-            options.has("force"));
+        try {
+            OptionSet options = parser.parse(args);
+            return new Config(portOpt.value(options), workDirOpt.value(options), !options.has("non-interactive"),
+                options.has("force"));
+        } catch (OptionException optException) {
+            try {
+                System.err.println("[ERROR] " + optException.getMessage());
+                System.out.println();
+                System.out.println("Usage:");
+                System.out.println("======");
+                parser.printHelpOn(System.out);
+                System.exit(0);
+                return null;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private static boolean userToStartAnother() {
