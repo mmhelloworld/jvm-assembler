@@ -1,16 +1,3 @@
-# JVM bytecode assembler server
-Assemble JVM bytecode via REST endpoint
-
-## Example
-
-```bash
-$ mvn package
-
-$ jvm-assembler-server/target/appassembler/bin/jvmasm --port 8080 &
-
-$ cat examples/Helloworld.json
-```
-```json
 {
     "instructions": [
         {
@@ -112,12 +99,3 @@ $ cat examples/Helloworld.json
         }
    ]
 }
-```
-
-```bash
-$ curl -H "Content-Type: application/json" -X POST -d @examples/Helloworld.json http://localhost:8080/assembler/assemble
-{"message":"","success":true}
-
-$ java Helloworld
-Hello world!
-```
