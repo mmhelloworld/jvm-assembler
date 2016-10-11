@@ -1,7 +1,6 @@
 package com.mmhelloworld.jvmassembler.server;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -33,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.I2l.class, name = "I2l"),
     @JsonSubTypes.Type(value = Asm.Iadd.class, name = "Iadd"),
     @JsonSubTypes.Type(value = Asm.Iconst.class, name = "Iconst"),
+    @JsonSubTypes.Type(value = Asm.Idiv.class, name = "Idiv"),
     @JsonSubTypes.Type(value = Asm.Ifeq.class, name = "Ifeq"),
     @JsonSubTypes.Type(value = Asm.Ificmpge.class, name = "Ificmpge"),
     @JsonSubTypes.Type(value = Asm.Ificmpgt.class, name = "Ificmpgt"),
@@ -45,6 +45,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.Istore.class, name = "Istore"),
     @JsonSubTypes.Type(value = Asm.Isub.class, name = "Isub"),
     @JsonSubTypes.Type(value = Asm.LabelStart.class, name = "LabelStart"),
+    @JsonSubTypes.Type(value = Asm.Ldc.DoubleConst.class, name = "Ldc"),
     @JsonSubTypes.Type(value = Asm.Ldc.IntegerConst.class, name = "Ldc"),
     @JsonSubTypes.Type(value = Asm.Ldc.StringConst.class, name = "Ldc"),
     @JsonSubTypes.Type(value = Asm.LookupSwitch.class, name = "LookupSwitch"),
@@ -90,6 +91,7 @@ public abstract class Asm {
         I2l,
         Iadd,
         Iconst,
+        Idiv,
         Ifeq,
         Ificmpge,
         Ificmpgt,
@@ -407,6 +409,9 @@ public abstract class Asm {
         }
     }
 
+    public static class Idiv extends Asm {
+    }
+
     public static class Ifeq extends Asm {
         private final String label;
 
@@ -606,7 +611,19 @@ public abstract class Asm {
         }
 
 
-        public enum LdcType { IntegerConst, StringConst }
+        public enum LdcType { DoubleConst, IntegerConst, StringConst }
+
+        public static final class DoubleConst extends Ldc {
+            private final double val;
+
+            public DoubleConst(@JsonProperty("val") final double val) {
+                this.val = val;
+            }
+
+            public double getVal() {
+                return val;
+            }
+        }
 
         public static final class IntegerConst extends Ldc {
             private final int val;

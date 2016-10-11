@@ -1,5 +1,6 @@
 package com.mmhelloworld.jvmassembler.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -39,6 +40,7 @@ import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
 import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.IDIV;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.IMUL;
 import static org.objectweb.asm.Opcodes.ISTORE;
@@ -50,7 +52,6 @@ import static org.objectweb.asm.Opcodes.SIPUSH;
 
 @Path("/assembler")
 public class AssemblerResource {
-
     @GET
     @Path("/health")
     public Response checkHealth() {
@@ -61,7 +62,7 @@ public class AssemblerResource {
     @Path("/assemble")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public AssemblerResponse assemble(CreateBytecode request) {
+    public AssemblerResponse assemble(CreateBytecode request) throws JsonProcessingException {
         ClassWriter cw = null;
         MethodVisitor mv = null;
         Map<String, Object> env = new HashMap<>();
@@ -179,6 +180,9 @@ public class AssemblerResource {
                             mv.visitLdcInsn(new Integer(n));
                         }
                         break;
+                    case Idiv:
+                        mv.visitInsn(IDIV);
+                        break;
                     case Ifeq:
                         Asm.Ifeq ifeq = (Asm.Ifeq) asm;
                         mv.visitJumpInsn(Opcodes.IFEQ, (Label) env.get(ifeq.getLabel()));
@@ -254,6 +258,9 @@ public class AssemblerResource {
                     case Ldc:
                         Asm.Ldc ldc = (Asm.Ldc) asm;
                         switch (ldc.getConstType()) {
+                            case DoubleConst:
+                                mv.visitLdcInsn(((Asm.Ldc.DoubleConst)ldc).getVal());
+                                break;
                             case IntegerConst:
                                 mv.visitLdcInsn(((Asm.Ldc.IntegerConst) ldc).getVal());
                                 break;
