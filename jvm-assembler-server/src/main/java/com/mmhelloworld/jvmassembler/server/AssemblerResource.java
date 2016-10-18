@@ -21,34 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.objectweb.asm.Opcodes.AALOAD;
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.I2C;
-import static org.objectweb.asm.Opcodes.I2L;
-import static org.objectweb.asm.Opcodes.IADD;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.ICONST_1;
-import static org.objectweb.asm.Opcodes.ICONST_2;
-import static org.objectweb.asm.Opcodes.ICONST_3;
-import static org.objectweb.asm.Opcodes.ICONST_4;
-import static org.objectweb.asm.Opcodes.ICONST_5;
-import static org.objectweb.asm.Opcodes.ICONST_M1;
-import static org.objectweb.asm.Opcodes.IDIV;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.IMUL;
-import static org.objectweb.asm.Opcodes.ISTORE;
-import static org.objectweb.asm.Opcodes.ISUB;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.POP;
-import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.Opcodes.SIPUSH;
+import static org.objectweb.asm.Opcodes.*;
 
 @Path("/assembler")
 public class AssemblerResource {
@@ -164,6 +137,9 @@ public class AssemblerResource {
                     case Iadd:
                         mv.visitInsn(IADD);
                         break;
+                    case Iand:
+                        mv.visitInsn(IAND);
+                        break;
                     case Iconst:
                         Asm.Iconst iconst = (Asm.Iconst) asm;
                         int n = iconst.getN();
@@ -244,17 +220,38 @@ public class AssemblerResource {
                             bsmArgs
                         );
                         break;
+                    case Irem:
+                        mv.visitInsn(IREM);
+                        break;
+                    case Ishl:
+                        mv.visitInsn(ISHL);
+                        break;
+                    case Ishr:
+                        mv.visitInsn(ISHR);
+                        break;
                     case Istore:
                         mv.visitVarInsn(ISTORE, ((Asm.Istore) asm).getN());
                         break;
                     case Isub:
                         mv.visitInsn(ISUB);
                         break;
+                    case Iushr:
+                        mv.visitInsn(IUSHR);
+                        break;
+                    case L2i:
+                        mv.visitInsn(L2I);
+                        break;
                     case LabelStart: {
                         String label = ((Asm.LabelStart) asm).getLabel();
                         mv.visitLabel((Label) (env.get(label)));
                         break;
                     }
+                    case Ladd:
+                        mv.visitInsn(LADD);
+                        break;
+                    case Land:
+                        mv.visitInsn(LAND);
+                        break;
                     case Ldc:
                         Asm.Ldc ldc = (Asm.Ldc) asm;
                         switch (ldc.getConstType()) {
@@ -264,10 +261,19 @@ public class AssemblerResource {
                             case IntegerConst:
                                 mv.visitLdcInsn(((Asm.Ldc.IntegerConst) ldc).getVal());
                                 break;
+                            case LongConst:
+                                mv.visitLdcInsn(((Asm.Ldc.LongConst) ldc).getVal());
+                                break;
                             case StringConst:
                                 mv.visitLdcInsn(((Asm.Ldc.StringConst) ldc).getVal());
                                 break;
                         }
+                        break;
+                    case Ldiv:
+                        mv.visitInsn(LDIV);
+                        break;
+                    case Lmul:
+                        mv.visitInsn(LMUL);
                         break;
                     case LookupSwitch:
                         Asm.LookupSwitch lookupSwitch = (Asm.LookupSwitch) asm;
@@ -278,6 +284,18 @@ public class AssemblerResource {
                                 .map(s -> (Label) env.get(s))
                                 .toArray(Label[]::new)
                         );
+                        break;
+                    case Lshl:
+                        mv.visitInsn(LSHL);
+                        break;
+                    case Lshr:
+                        mv.visitInsn(LSHR);
+                        break;
+                    case Lsub:
+                        mv.visitInsn(LSUB);
+                        break;
+                    case Lushr:
+                        mv.visitInsn(LUSHR);
                         break;
                     case MaxStackAndLocal:
                         Asm.MaxStackAndLocal maxStackAndLocal = (Asm.MaxStackAndLocal) asm;

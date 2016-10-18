@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.I2c.class, name = "I2c"),
     @JsonSubTypes.Type(value = Asm.I2l.class, name = "I2l"),
     @JsonSubTypes.Type(value = Asm.Iadd.class, name = "Iadd"),
+    @JsonSubTypes.Type(value = Asm.Iand.class, name = "Iand"),
     @JsonSubTypes.Type(value = Asm.Iconst.class, name = "Iconst"),
     @JsonSubTypes.Type(value = Asm.Idiv.class, name = "Idiv"),
     @JsonSubTypes.Type(value = Asm.Ifeq.class, name = "Ifeq"),
@@ -42,13 +43,27 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.Imul.class, name = "Imul"),
     @JsonSubTypes.Type(value = Asm.InvokeMethod.class, name = "InvokeMethod"),
     @JsonSubTypes.Type(value = Asm.InvokeDynamic.class, name = "InvokeDynamic"),
+    @JsonSubTypes.Type(value = Asm.Irem.class, name = "Irem"),
+    @JsonSubTypes.Type(value = Asm.Ishl.class, name = "Ishl"),
+    @JsonSubTypes.Type(value = Asm.Ishr.class, name = "Ishr"),
     @JsonSubTypes.Type(value = Asm.Istore.class, name = "Istore"),
     @JsonSubTypes.Type(value = Asm.Isub.class, name = "Isub"),
+    @JsonSubTypes.Type(value = Asm.Iushr.class, name = "Iushr"),
+    @JsonSubTypes.Type(value = Asm.L2i.class, name = "L2i"),
     @JsonSubTypes.Type(value = Asm.LabelStart.class, name = "LabelStart"),
+    @JsonSubTypes.Type(value = Asm.Ladd.class, name = "Ladd"),
+    @JsonSubTypes.Type(value = Asm.Land.class, name = "Land"),
     @JsonSubTypes.Type(value = Asm.Ldc.DoubleConst.class, name = "Ldc"),
     @JsonSubTypes.Type(value = Asm.Ldc.IntegerConst.class, name = "Ldc"),
+    @JsonSubTypes.Type(value = Asm.Ldc.LongConst.class, name = "Ldc"),
     @JsonSubTypes.Type(value = Asm.Ldc.StringConst.class, name = "Ldc"),
+    @JsonSubTypes.Type(value = Asm.Ldiv.class, name = "Ldiv"),
+    @JsonSubTypes.Type(value = Asm.Lmul.class, name = "Lmul"),
+    @JsonSubTypes.Type(value = Asm.Lshl.class, name = "Lshl"),
+    @JsonSubTypes.Type(value = Asm.Lshr.class, name = "Lshr"),
     @JsonSubTypes.Type(value = Asm.LookupSwitch.class, name = "LookupSwitch"),
+    @JsonSubTypes.Type(value = Asm.Lsub.class, name = "Lsub"),
+    @JsonSubTypes.Type(value = Asm.Lushr.class, name = "Lushr"),
     @JsonSubTypes.Type(value = Asm.MaxStackAndLocal.class, name = "MaxStackAndLocal"),
     @JsonSubTypes.Type(value = Asm.MethodCodeStart.class, name = "MethodCodeStart"),
     @JsonSubTypes.Type(value = Asm.MethodCodeEnd.class, name = "MethodCodeEnd"),
@@ -90,6 +105,7 @@ public abstract class Asm {
         I2c,
         I2l,
         Iadd,
+        Iand,
         Iconst,
         Idiv,
         Ifeq,
@@ -101,11 +117,24 @@ public abstract class Asm {
         Imul,
         InvokeMethod,
         InvokeDynamic,
+        Irem,
+        Ishl,
+        Ishr,
         Istore,
         Isub,
+        Iushr,
+        L2i,
         LabelStart,
+        Ladd,
+        Land,
         Ldc,
+        Ldiv,
+        Lmul,
+        Lshl,
+        Lshr,
         LookupSwitch,
+        Lsub,
+        Lushr,
         MaxStackAndLocal,
         MethodCodeStart,
         MethodCodeEnd,
@@ -397,6 +426,9 @@ public abstract class Asm {
     public static class Iadd extends Asm {
     }
 
+    public static class Iand extends Asm {
+    }
+
     public static class Iconst extends Asm {
         private final int n;
 
@@ -594,7 +626,9 @@ public abstract class Asm {
         property = "constType",
         visible = true)
     @JsonSubTypes({
+        @JsonSubTypes.Type(value = Asm.Ldc.DoubleConst.class, name = "DoubleConst"),
         @JsonSubTypes.Type(value = Asm.Ldc.IntegerConst.class, name = "IntegerConst"),
+        @JsonSubTypes.Type(value = Asm.Ldc.LongConst.class, name = "LongConst"),
         @JsonSubTypes.Type(value = Asm.Ldc.StringConst.class, name = "StringConst")
     })
     public static abstract class Ldc extends Asm {
@@ -611,7 +645,7 @@ public abstract class Asm {
         }
 
 
-        public enum LdcType { DoubleConst, IntegerConst, StringConst }
+        public enum LdcType { DoubleConst, IntegerConst, LongConst, StringConst }
 
         public static final class DoubleConst extends Ldc {
             private final double val;
@@ -645,6 +679,18 @@ public abstract class Asm {
             }
 
             public String getVal() {
+                return val;
+            }
+        }
+
+        public static final class LongConst extends Ldc {
+            private final long val;
+
+            public LongConst(@JsonProperty("val") final long val) {
+                this.val = val;
+            }
+
+            public long getVal() {
                 return val;
             }
         }
@@ -822,5 +868,44 @@ public abstract class Asm {
             }
         }
 
+    }
+
+    public static class Ladd extends Asm {
+    }
+
+    public static class Land extends Asm {
+    }
+
+    public static class Ldiv extends Asm {
+    }
+
+    public static class Lmul extends Asm {
+    }
+
+    public static class Lsub extends Asm {
+    }
+
+    public static class Ishl extends Asm {
+    }
+
+    public static class Ishr extends Asm {
+    }
+
+    public static class Iushr extends Asm {
+    }
+
+    public static class Lshl extends Asm {
+    }
+
+    public static class Lshr extends Asm {
+    }
+
+    public static class Lushr extends Asm {
+    }
+
+    public static class L2i extends Asm {
+    }
+
+    public static class Irem extends Asm {
     }
 }
