@@ -62,6 +62,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.Lshl.class, name = "Lshl"),
     @JsonSubTypes.Type(value = Asm.Lshr.class, name = "Lshr"),
     @JsonSubTypes.Type(value = Asm.LookupSwitch.class, name = "LookupSwitch"),
+    @JsonSubTypes.Type(value = Asm.Lrem.class, name = "Lrem"),
     @JsonSubTypes.Type(value = Asm.Lsub.class, name = "Lsub"),
     @JsonSubTypes.Type(value = Asm.Lushr.class, name = "Lushr"),
     @JsonSubTypes.Type(value = Asm.MaxStackAndLocal.class, name = "MaxStackAndLocal"),
@@ -133,6 +134,7 @@ public abstract class Asm {
         Lshl,
         Lshr,
         LookupSwitch,
+        Lrem,
         Lsub,
         Lushr,
         MaxStackAndLocal,
@@ -907,5 +909,8 @@ public abstract class Asm {
     }
 
     public static class Irem extends Asm {
+    }
+
+    public static class Lrem extends Asm {
     }
 }

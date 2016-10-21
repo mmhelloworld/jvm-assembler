@@ -288,6 +288,9 @@ public class AssemblerResource {
                     case Lshl:
                         mv.visitInsn(LSHL);
                         break;
+                    case Lrem:
+                        mv.visitInsn(LREM);
+                        break;
                     case Lshr:
                         mv.visitInsn(LSHR);
                         break;
