@@ -24,6 +24,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.CreateClass.class, name = "CreateClass"),
     @JsonSubTypes.Type(value = Asm.CreateLabel.class, name = "CreateLabel"),
     @JsonSubTypes.Type(value = Asm.CreateMethod.class, name = "CreateMethod"),
+    @JsonSubTypes.Type(value = Asm.Dadd.class, name = "Dadd"),
+    @JsonSubTypes.Type(value = Asm.Ddiv.class, name = "Ddiv"),
+    @JsonSubTypes.Type(value = Asm.Dmul.class, name = "Dmul"),
+    @JsonSubTypes.Type(value = Asm.Drem.class, name = "Drem"),
+    @JsonSubTypes.Type(value = Asm.Dsub.class, name = "Dsub"),
     @JsonSubTypes.Type(value = Asm.Dup.class, name = "Dup"),
     @JsonSubTypes.Type(value = Asm.Field.class, name = "Field"),
     @JsonSubTypes.Type(value = Asm.Frame.class, name = "Frame"),
@@ -53,10 +58,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.LabelStart.class, name = "LabelStart"),
     @JsonSubTypes.Type(value = Asm.Ladd.class, name = "Ladd"),
     @JsonSubTypes.Type(value = Asm.Land.class, name = "Land"),
-    @JsonSubTypes.Type(value = Asm.Ldc.DoubleConst.class, name = "Ldc"),
-    @JsonSubTypes.Type(value = Asm.Ldc.IntegerConst.class, name = "Ldc"),
-    @JsonSubTypes.Type(value = Asm.Ldc.LongConst.class, name = "Ldc"),
-    @JsonSubTypes.Type(value = Asm.Ldc.StringConst.class, name = "Ldc"),
+    @JsonSubTypes.Type(value = Asm.LdcDouble.class, name = "LdcDouble"),
+    @JsonSubTypes.Type(value = Asm.LdcInteger.class, name = "LdcInteger"),
+    @JsonSubTypes.Type(value = Asm.LdcString.class, name = "LdcString"),
+    @JsonSubTypes.Type(value = Asm.LdcLong.class, name = "LdcLong"),
     @JsonSubTypes.Type(value = Asm.Ldiv.class, name = "Ldiv"),
     @JsonSubTypes.Type(value = Asm.Lmul.class, name = "Lmul"),
     @JsonSubTypes.Type(value = Asm.Lshl.class, name = "Lshl"),
@@ -99,6 +104,11 @@ public abstract class Asm {
         CreateClass,
         CreateLabel,
         CreateMethod,
+        Dadd,
+        Ddiv,
+        Dmul,
+        Drem,
+        Dsub,
         Dup,
         Field,
         Frame,
@@ -128,7 +138,10 @@ public abstract class Asm {
         LabelStart,
         Ladd,
         Land,
-        Ldc,
+        LdcDouble,
+        LdcInteger,
+        LdcLong,
+        LdcString,
         Ldiv,
         Lmul,
         Lshl,
@@ -622,79 +635,51 @@ public abstract class Asm {
         }
     }
 
-    @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "constType",
-        visible = true)
-    @JsonSubTypes({
-        @JsonSubTypes.Type(value = Asm.Ldc.DoubleConst.class, name = "DoubleConst"),
-        @JsonSubTypes.Type(value = Asm.Ldc.IntegerConst.class, name = "IntegerConst"),
-        @JsonSubTypes.Type(value = Asm.Ldc.LongConst.class, name = "LongConst"),
-        @JsonSubTypes.Type(value = Asm.Ldc.StringConst.class, name = "StringConst")
-    })
-    public static abstract class Ldc extends Asm {
-        private LdcType constType;
+    public static final class LdcDouble extends Asm {
+        private final double val;
 
-        private Ldc() {}
-
-        public LdcType getConstType() {
-            return constType;
+        public LdcDouble(@JsonProperty("val") final double val) {
+            this.val = val;
         }
 
-        public void setConstType(final LdcType constType) {
-            this.constType = constType;
+        public double getVal() {
+            return val;
+        }
+    }
+
+    public static final class LdcInteger extends Asm {
+        private final int val;
+
+        public LdcInteger(@JsonProperty("val") final int val) {
+            this.val = val;
         }
 
+        public int getVal() {
+            return val;
+        }
+    }
 
-        public enum LdcType { DoubleConst, IntegerConst, LongConst, StringConst }
+    public static final class LdcString extends Asm {
+        private final String val;
 
-        public static final class DoubleConst extends Ldc {
-            private final double val;
-
-            public DoubleConst(@JsonProperty("val") final double val) {
-                this.val = val;
-            }
-
-            public double getVal() {
-                return val;
-            }
+        public LdcString(@JsonProperty("val") final String val) {
+            this.val = val;
         }
 
-        public static final class IntegerConst extends Ldc {
-            private final int val;
+        public String getVal() {
+            return val;
+        }
+    }
 
-            public IntegerConst(@JsonProperty("val") final int val) {
-                this.val = val;
-            }
+    public static final class LdcLong extends Asm {
+        private final long val;
 
-            public int getVal() {
-                return val;
-            }
+        public LdcLong(@JsonProperty("val") final long val) {
+            this.val = val;
         }
 
-        public static final class StringConst extends Ldc {
-            private final String val;
-
-            public StringConst(@JsonProperty("val") final String val) {
-                this.val = val;
-            }
-
-            public String getVal() {
-                return val;
-            }
-        }
-
-        public static final class LongConst extends Ldc {
-            private final long val;
-
-            public LongConst(@JsonProperty("val") final long val) {
-                this.val = val;
-            }
-
-            public long getVal() {
-                return val;
-            }
+        public long getVal() {
+            return val;
         }
     }
 
@@ -831,7 +816,8 @@ public abstract class Asm {
     public static abstract class BsmArg {
         private BsmArgType type;
 
-        private BsmArg() {}
+        private BsmArg() {
+        }
 
         public BsmArgType getType() {
             return type;
@@ -912,5 +898,20 @@ public abstract class Asm {
     }
 
     public static class Lrem extends Asm {
+    }
+
+    public static class Dadd extends Asm {
+    }
+
+    public static class Ddiv extends Asm {
+    }
+
+    public static class Dmul extends Asm {
+    }
+
+    public static class Drem extends Asm {
+    }
+
+    public static class Dsub extends Asm {
     }
 }

@@ -107,6 +107,21 @@ public class AssemblerResource {
                             createMethod.getSig(),
                             createMethod.getExcs());
                         break;
+                    case Dadd:
+                        mv.visitInsn(DADD);
+                        break;
+                    case Ddiv:
+                        mv.visitInsn(DDIV);
+                        break;
+                    case Dmul:
+                        mv.visitInsn(DMUL);
+                        break;
+                    case Drem:
+                        mv.visitInsn(DREM);
+                        break;
+                    case Dsub:
+                        mv.visitInsn(DSUB);
+                        break;
                     case Dup:
                         mv.visitInsn(DUP);
                         break;
@@ -252,22 +267,17 @@ public class AssemblerResource {
                     case Land:
                         mv.visitInsn(LAND);
                         break;
-                    case Ldc:
-                        Asm.Ldc ldc = (Asm.Ldc) asm;
-                        switch (ldc.getConstType()) {
-                            case DoubleConst:
-                                mv.visitLdcInsn(((Asm.Ldc.DoubleConst)ldc).getVal());
-                                break;
-                            case IntegerConst:
-                                mv.visitLdcInsn(((Asm.Ldc.IntegerConst) ldc).getVal());
-                                break;
-                            case LongConst:
-                                mv.visitLdcInsn(((Asm.Ldc.LongConst) ldc).getVal());
-                                break;
-                            case StringConst:
-                                mv.visitLdcInsn(((Asm.Ldc.StringConst) ldc).getVal());
-                                break;
-                        }
+                    case LdcDouble:
+                        mv.visitLdcInsn(((Asm.LdcDouble) asm).getVal());
+                        break;
+                    case LdcInteger:
+                        mv.visitLdcInsn(((Asm.LdcInteger) asm).getVal());
+                        break;
+                    case LdcLong:
+                        mv.visitLdcInsn(((Asm.LdcLong) asm).getVal());
+                        break;
+                    case LdcString:
+                        mv.visitLdcInsn(((Asm.LdcString) asm).getVal());
                         break;
                     case Ldiv:
                         mv.visitInsn(LDIV);
