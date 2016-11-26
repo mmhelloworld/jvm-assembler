@@ -318,18 +318,21 @@ public abstract class Asm {
 
     public static class CreateMethod extends Asm {
         private final int acc;
-        private final String name;
+        private final String cname;
+        private final String fname;
         private final String desc;
         private final String sig;
         private final String[] excs;
 
         public CreateMethod(@JsonProperty("acc") final int acc,
-                            @JsonProperty("name") final String name,
+                            @JsonProperty("cname") final String cname,
+                            @JsonProperty("fname") final String fname,
                             @JsonProperty("desc") final String desc,
                             @JsonProperty("sig") final String sig,
                             @JsonProperty("excs") final String[] excs) {
             this.acc = acc;
-            this.name = name;
+            this.cname = cname;
+            this.fname = fname;
             this.desc = desc;
             this.sig = sig;
             this.excs = excs;
@@ -339,8 +342,12 @@ public abstract class Asm {
             return acc;
         }
 
-        public String getName() {
-            return name;
+        public String getFname() {
+            return fname;
+        }
+
+        public String getCname() {
+            return cname;
         }
 
         public String getDesc() {

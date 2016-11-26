@@ -15,12 +15,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.*;
 
 @Path("/assembler")
@@ -36,6 +40,7 @@ public class AssemblerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public AssemblerResponse assemble(CreateBytecode request) throws JsonProcessingException {
+        Map<String, ClassWriter> cws = new HashMap<>();
         ClassWriter cw = null;
         MethodVisitor mv = null;
         Map<String, Object> env = new HashMap<>();
@@ -81,13 +86,23 @@ public class AssemblerResource {
                             classCodeStart.getSig(),
                             classCodeStart.getParent(),
                             classCodeStart.getInterfaces());
+                        mv = createDefaultConstructor(cw);
                         break;
                     case ClassCodeEnd:
                         cw.visitEnd();
                         Asm.ClassCodeEnd classCodeEnd = (Asm.ClassCodeEnd) asm;
-                        try (OutputStream out = new FileOutputStream(classCodeEnd.getOut())) {
-                            out.write(cw.toByteArray());
-                        }
+                        cws.entrySet().parallelStream().forEach(e -> {
+                            String className = e.getKey();
+                            ClassWriter classWriter = e.getValue();
+                            File outFile = new File(classCodeEnd.getOut(), className + ".class");
+                            new File(outFile.getParent()).mkdirs();
+                            try (OutputStream out = new FileOutputStream(outFile)) {
+                                out.write(classWriter.toByteArray());
+                            } catch (Exception exception) {
+                                exception.printStackTrace();
+                            }
+                        });
+
                         break;
                     case CreateClass:
                         cw = new ClassWriter(((Asm.CreateClass) asm).getFlags());
@@ -100,9 +115,16 @@ public class AssemblerResource {
                     }
                     case CreateMethod:
                         Asm.CreateMethod createMethod = (Asm.CreateMethod) asm;
+                        final String className = createMethod.getCname();
+                        cw = cws.computeIfAbsent(className, cname -> {
+                            final ClassWriter classWriter = new ClassWriter(COMPUTE_MAXS);
+                            classWriter.visit(52, ACC_PUBLIC, className, null, "java/lang/Object", null);
+                            createDefaultConstructor(classWriter);
+                            return classWriter;
+                        });
                         mv = cw.visitMethod(
                             createMethod.getAcc(),
-                            createMethod.getName(),
+                            createMethod.getFname(),
                             createMethod.getDesc(),
                             createMethod.getSig(),
                             createMethod.getExcs());
@@ -342,6 +364,18 @@ public class AssemblerResource {
             error = e.getMessage();
         }
         return new AssemblerResponse(isSuccess, error);
+    }
+
+    private MethodVisitor createDefaultConstructor(final ClassWriter cw) {
+        final MethodVisitor mv;
+        mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        mv.visitInsn(RETURN);
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+        return mv;
     }
 
     private Handle getAsmHandle(final Asm.Handle handle) {
