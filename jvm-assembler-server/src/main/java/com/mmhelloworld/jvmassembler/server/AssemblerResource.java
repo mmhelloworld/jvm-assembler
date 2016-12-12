@@ -86,7 +86,7 @@ public class AssemblerResource {
                             classCodeStart.getSig(),
                             classCodeStart.getParent(),
                             classCodeStart.getInterfaces());
-                        mv = createDefaultConstructor(cw);
+                        cws.put(classCodeStart.getName(), cw);
                         break;
                     case ClassCodeEnd:
                         cw.visitEnd();
@@ -260,6 +260,9 @@ public class AssemblerResource {
                     case Irem:
                         mv.visitInsn(IREM);
                         break;
+                    case Ireturn:
+                        mv.visitInsn(IRETURN);
+                        break;
                     case Ishl:
                         mv.visitInsn(ISHL);
                         break;
@@ -304,6 +307,9 @@ public class AssemblerResource {
                     case Ldiv:
                         mv.visitInsn(LDIV);
                         break;
+                    case Lload:
+                        mv.visitVarInsn(LLOAD, ((Asm.Lload) asm).getN());
+                        break;
                     case Lmul:
                         mv.visitInsn(LMUL);
                         break;
@@ -322,6 +328,9 @@ public class AssemblerResource {
                         break;
                     case Lrem:
                         mv.visitInsn(LREM);
+                        break;
+                    case Lreturn:
+                        mv.visitInsn(LRETURN);
                         break;
                     case Lshr:
                         mv.visitInsn(LSHR);

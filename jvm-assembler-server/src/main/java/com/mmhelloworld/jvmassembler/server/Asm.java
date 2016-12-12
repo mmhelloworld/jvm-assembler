@@ -49,6 +49,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.InvokeMethod.class, name = "InvokeMethod"),
     @JsonSubTypes.Type(value = Asm.InvokeDynamic.class, name = "InvokeDynamic"),
     @JsonSubTypes.Type(value = Asm.Irem.class, name = "Irem"),
+    @JsonSubTypes.Type(value = Asm.Ireturn.class, name = "Ireturn"),
     @JsonSubTypes.Type(value = Asm.Ishl.class, name = "Ishl"),
     @JsonSubTypes.Type(value = Asm.Ishr.class, name = "Ishr"),
     @JsonSubTypes.Type(value = Asm.Istore.class, name = "Istore"),
@@ -63,7 +64,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.LdcString.class, name = "LdcString"),
     @JsonSubTypes.Type(value = Asm.LdcLong.class, name = "LdcLong"),
     @JsonSubTypes.Type(value = Asm.Ldiv.class, name = "Ldiv"),
+    @JsonSubTypes.Type(value = Asm.Lload.class, name = "Lload"),
     @JsonSubTypes.Type(value = Asm.Lmul.class, name = "Lmul"),
+    @JsonSubTypes.Type(value = Asm.Lreturn.class, name = "Lreturn"),
     @JsonSubTypes.Type(value = Asm.Lshl.class, name = "Lshl"),
     @JsonSubTypes.Type(value = Asm.Lshr.class, name = "Lshr"),
     @JsonSubTypes.Type(value = Asm.LookupSwitch.class, name = "LookupSwitch"),
@@ -129,6 +132,7 @@ public abstract class Asm {
         InvokeMethod,
         InvokeDynamic,
         Irem,
+        Ireturn,
         Ishl,
         Ishr,
         Istore,
@@ -143,7 +147,9 @@ public abstract class Asm {
         LdcLong,
         LdcString,
         Ldiv,
+        Lload,
         Lmul,
+        Lreturn,
         Lshl,
         Lshr,
         LookupSwitch,
@@ -243,6 +249,12 @@ public abstract class Asm {
     }
 
     public static class Areturn extends Asm {
+    }
+
+    public static class Ireturn extends Asm {
+    }
+
+    public static class Lreturn extends Asm {
     }
 
     public static class Checkcast extends Asm {
@@ -920,5 +932,17 @@ public abstract class Asm {
     }
 
     public static class Dsub extends Asm {
+    }
+
+    public static class Lload extends Asm {
+        private final int n;
+
+        public Lload(@JsonProperty("n") final int n) {
+            this.n = n;
+        }
+
+        public int getN() {
+            return n;
+        }
     }
 }
