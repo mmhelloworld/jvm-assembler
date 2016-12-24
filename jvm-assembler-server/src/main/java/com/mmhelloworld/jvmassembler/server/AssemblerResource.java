@@ -135,11 +135,17 @@ public class AssemblerResource {
                     case Ddiv:
                         mv.visitInsn(DDIV);
                         break;
+                    case Dload:
+                        mv.visitVarInsn(DLOAD, ((Asm.Dload) asm).getN());
+                        break;
                     case Dmul:
                         mv.visitInsn(DMUL);
                         break;
                     case Drem:
                         mv.visitInsn(DREM);
+                        break;
+                    case Dreturn:
+                        mv.visitInsn(DRETURN);
                         break;
                     case Dsub:
                         mv.visitInsn(DSUB);
@@ -147,9 +153,15 @@ public class AssemblerResource {
                     case Dup:
                         mv.visitInsn(DUP);
                         break;
+                    case F2d:
+                        mv.visitInsn(F2D);
+                        break;
                     case Field:
                         Asm.Field field = (Asm.Field) asm;
                         mv.visitFieldInsn(field.getFtype(), field.getCname(), field.getFname(), field.getDesc());
+                        break;
+                    case Fload:
+                        mv.visitVarInsn(FLOAD, ((Asm.Fload) asm).getN());
                         break;
                     case Frame:
                         Asm.Frame frame = (Asm.Frame) asm;
@@ -160,6 +172,9 @@ public class AssemblerResource {
                             frame.getNstack(),
                             Arrays.stream(frame.getStack()).map(s -> s.equalsIgnoreCase("opcodes.integer") ? Opcodes.INTEGER : s).toArray()
                         );
+                        break;
+                    case Freturn:
+                        mv.visitInsn(FRETURN);
                         break;
                     case Goto:
                         String labelName = ((Asm.Goto) asm).getLabel();

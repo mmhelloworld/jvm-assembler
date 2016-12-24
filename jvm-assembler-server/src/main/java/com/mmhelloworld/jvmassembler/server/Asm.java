@@ -26,12 +26,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.CreateMethod.class, name = "CreateMethod"),
     @JsonSubTypes.Type(value = Asm.Dadd.class, name = "Dadd"),
     @JsonSubTypes.Type(value = Asm.Ddiv.class, name = "Ddiv"),
+    @JsonSubTypes.Type(value = Asm.Dload.class, name = "Dload"),
     @JsonSubTypes.Type(value = Asm.Dmul.class, name = "Dmul"),
     @JsonSubTypes.Type(value = Asm.Drem.class, name = "Drem"),
+    @JsonSubTypes.Type(value = Asm.Dreturn.class, name = "Dreturn"),
     @JsonSubTypes.Type(value = Asm.Dsub.class, name = "Dsub"),
     @JsonSubTypes.Type(value = Asm.Dup.class, name = "Dup"),
+    @JsonSubTypes.Type(value = Asm.F2d.class, name = "F2d"),
     @JsonSubTypes.Type(value = Asm.Field.class, name = "Field"),
+    @JsonSubTypes.Type(value = Asm.Fload.class, name = "Fload"),
     @JsonSubTypes.Type(value = Asm.Frame.class, name = "Frame"),
+    @JsonSubTypes.Type(value = Asm.Freturn.class, name = "Freturn"),
     @JsonSubTypes.Type(value = Asm.Goto.class, name = "Goto"),
     @JsonSubTypes.Type(value = Asm.I2c.class, name = "I2c"),
     @JsonSubTypes.Type(value = Asm.I2l.class, name = "I2l"),
@@ -109,12 +114,17 @@ public abstract class Asm {
         CreateMethod,
         Dadd,
         Ddiv,
+        Dload,
         Dmul,
         Drem,
+        Dreturn,
         Dsub,
         Dup,
+        F2d,
         Field,
+        Fload,
         Frame,
+        Freturn,
         Goto,
         I2c,
         I2l,
@@ -252,6 +262,15 @@ public abstract class Asm {
     }
 
     public static class Ireturn extends Asm {
+    }
+
+    public static class Dreturn extends Asm {
+    }
+
+    public static class Freturn extends Asm {
+    }
+
+    public static class F2d extends Asm {
     }
 
     public static class Lreturn extends Asm {
@@ -938,6 +957,30 @@ public abstract class Asm {
         private final int n;
 
         public Lload(@JsonProperty("n") final int n) {
+            this.n = n;
+        }
+
+        public int getN() {
+            return n;
+        }
+    }
+
+    public static class Fload extends Asm {
+        private final int n;
+
+        public Fload(@JsonProperty("n") final int n) {
+            this.n = n;
+        }
+
+        public int getN() {
+            return n;
+        }
+    }
+
+    public static class Dload extends Asm {
+        private final int n;
+
+        public Dload(@JsonProperty("n") final int n) {
             this.n = n;
         }
 
