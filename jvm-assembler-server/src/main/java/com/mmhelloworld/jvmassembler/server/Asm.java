@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.ClassCodeStart.class, name = "ClassCodeStart"),
     @JsonSubTypes.Type(value = Asm.ClassCodeEnd.class, name = "ClassCodeEnd"),
     @JsonSubTypes.Type(value = Asm.CreateClass.class, name = "CreateClass"),
+    @JsonSubTypes.Type(value = Asm.CreateField.class, name = "CreateField"),
     @JsonSubTypes.Type(value = Asm.CreateLabel.class, name = "CreateLabel"),
     @JsonSubTypes.Type(value = Asm.CreateMethod.class, name = "CreateMethod"),
     @JsonSubTypes.Type(value = Asm.Dadd.class, name = "Dadd"),
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.Dup.class, name = "Dup"),
     @JsonSubTypes.Type(value = Asm.F2d.class, name = "F2d"),
     @JsonSubTypes.Type(value = Asm.Field.class, name = "Field"),
+    @JsonSubTypes.Type(value = Asm.FieldEnd.class, name = "FieldEnd"),
     @JsonSubTypes.Type(value = Asm.Fload.class, name = "Fload"),
     @JsonSubTypes.Type(value = Asm.Frame.class, name = "Frame"),
     @JsonSubTypes.Type(value = Asm.Freturn.class, name = "Freturn"),
@@ -110,6 +112,7 @@ public abstract class Asm {
         ClassCodeStart,
         ClassCodeEnd,
         CreateClass,
+        CreateField,
         CreateLabel,
         CreateMethod,
         Dadd,
@@ -122,6 +125,7 @@ public abstract class Asm {
         Dup,
         F2d,
         Field,
+        FieldEnd,
         Fload,
         Frame,
         Freturn,
@@ -394,6 +398,46 @@ public abstract class Asm {
         }
     }
 
+    public static class CreateField extends Asm {
+        private final int acc;
+        private final String name;
+        private final String desc;
+        private final String sig;
+        private final Object value;
+
+        public CreateField(@JsonProperty("acc") final int acc,
+                            @JsonProperty("name") final String name,
+                            @JsonProperty("desc") final String desc,
+                            @JsonProperty("sig") final String sig,
+                            @JsonProperty("initVal") final Object value) {
+            this.acc = acc;
+            this.name = name;
+            this.desc = desc;
+            this.sig = sig;
+            this.value = value;
+        }
+
+        public int getAcc() {
+            return acc;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getSig() {
+            return sig;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+    }
+
     public static class Dup extends Asm {
     }
 
@@ -428,6 +472,10 @@ public abstract class Asm {
         public String getDesc() {
             return desc;
         }
+    }
+
+    public static class FieldEnd extends Asm {
+
     }
 
     public static class Frame extends Asm {
