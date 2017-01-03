@@ -166,6 +166,13 @@ public class AssemblerResource {
                         break;
                     case CreateField:
                         Asm.CreateField cf = (Asm.CreateField) asm;
+                        String fieldClassName = cf.getCname();
+                        cw = cws.computeIfAbsent(fieldClassName, cname -> {
+                            final ClassWriter classWriter = new ClassWriter(COMPUTE_MAXS);
+                            classWriter.visit(52, ACC_PUBLIC, cname, null, "java/lang/Object", null);
+                            createDefaultConstructor(classWriter);
+                            return classWriter;
+                        });
                         fv = cw.visitField(cf.getAcc(), cf.getName(), cf.getDesc(), cf.getSig(), cf.getValue());
                         break;
                     case CreateLabel: {

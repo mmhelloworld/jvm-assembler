@@ -400,17 +400,20 @@ public abstract class Asm {
 
     public static class CreateField extends Asm {
         private final int acc;
+        private final String cname;
         private final String name;
         private final String desc;
         private final String sig;
         private final Object value;
 
         public CreateField(@JsonProperty("acc") final int acc,
-                            @JsonProperty("name") final String name,
-                            @JsonProperty("desc") final String desc,
-                            @JsonProperty("sig") final String sig,
-                            @JsonProperty("initVal") final Object value) {
+                           @JsonProperty("cname") final String cname,
+                           @JsonProperty("name") final String name,
+                           @JsonProperty("desc") final String desc,
+                           @JsonProperty("sig") final String sig,
+                           @JsonProperty("initVal") final Object value) {
             this.acc = acc;
+            this.cname = cname;
             this.name = name;
             this.desc = desc;
             this.sig = sig;
@@ -435,6 +438,10 @@ public abstract class Asm {
 
         public Object getValue() {
             return value;
+        }
+
+        public String getCname() {
+            return cname;
         }
     }
 
