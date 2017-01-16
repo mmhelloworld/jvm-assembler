@@ -390,6 +390,9 @@ public class AssemblerResource {
                     case LdcString:
                         mv.visitLdcInsn(((Asm.LdcString) asm).getVal());
                         break;
+                    case LdcType:
+                        mv.visitLdcInsn(Type.getType(((Asm.LdcType)asm).getVal()));
+                        break;
                     case Ldiv:
                         mv.visitInsn(LDIV);
                         break;

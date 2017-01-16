@@ -70,6 +70,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.LdcInteger.class, name = "LdcInteger"),
     @JsonSubTypes.Type(value = Asm.LdcString.class, name = "LdcString"),
     @JsonSubTypes.Type(value = Asm.LdcLong.class, name = "LdcLong"),
+    @JsonSubTypes.Type(value = Asm.LdcType.class, name = "LdcType"),
     @JsonSubTypes.Type(value = Asm.Ldiv.class, name = "Ldiv"),
     @JsonSubTypes.Type(value = Asm.Lload.class, name = "Lload"),
     @JsonSubTypes.Type(value = Asm.Lmul.class, name = "Lmul"),
@@ -160,6 +161,7 @@ public abstract class Asm {
         LdcInteger,
         LdcLong,
         LdcString,
+        LdcType,
         Ldiv,
         Lload,
         Lmul,
@@ -772,6 +774,18 @@ public abstract class Asm {
         }
 
         public long getVal() {
+            return val;
+        }
+    }
+
+    public static final class LdcType extends Asm {
+        private final String val;
+
+        public LdcType(@JsonProperty("val") final String val) {
+            this.val = val;
+        }
+
+        public String getVal() {
             return val;
         }
     }
