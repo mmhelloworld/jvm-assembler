@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.ToString;
+
+import java.util.List;
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -16,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = Asm.Aconstnull.class, name = "Aconstnull"),
     @JsonSubTypes.Type(value = Asm.Aload.class, name = "Aload"),
     @JsonSubTypes.Type(value = Asm.Anewarray.class, name = "Anewarray"),
+    @JsonSubTypes.Type(value = Asm.Annotation.class, name = "Annotation"),
     @JsonSubTypes.Type(value = Asm.Astore.class, name = "Astore"),
     @JsonSubTypes.Type(value = Asm.Areturn.class, name = "Areturn"),
     @JsonSubTypes.Type(value = Asm.Checkcast.class, name = "Checkcast"),
@@ -107,6 +111,7 @@ public abstract class Asm {
         Aconstnull,
         Aload,
         Anewarray,
+        Annotation,
         Astore,
         Areturn,
         Checkcast,
@@ -301,19 +306,22 @@ public abstract class Asm {
         private final String sig;
         private final String parent;
         private final String[] interfaces;
+        private final List<Annotation> annotations;
 
         public ClassCodeStart(@JsonProperty("version") final int version,
                               @JsonProperty("acc") final int acc,
                               @JsonProperty("name") final String name,
                               @JsonProperty("sig") final String sig,
                               @JsonProperty("parent") final String parent,
-                              @JsonProperty("interfaces") final String[] interfaces) {
+                              @JsonProperty("interfaces") final String[] interfaces,
+                              @JsonProperty("annotations") final List<Annotation> annotations) {
             this.version = version;
             this.acc = acc;
             this.name = name;
             this.sig = sig;
             this.parent = parent;
             this.interfaces = interfaces;
+            this.annotations = annotations;
         }
 
         public int getVersion() {
@@ -339,6 +347,10 @@ public abstract class Asm {
         public String[] getInterfaces() {
             return interfaces;
         }
+
+        public List<Annotation> getAnnotations() {
+            return annotations;
+        }
     }
 
     public static class ClassCodeEnd extends Asm {
@@ -360,19 +372,25 @@ public abstract class Asm {
         private final String desc;
         private final String sig;
         private final String[] excs;
+        private final List<Annotation> anns;
+        private final List<List<Annotation>> paramAnns;
 
         public CreateMethod(@JsonProperty("acc") final int acc,
                             @JsonProperty("cname") final String cname,
                             @JsonProperty("fname") final String fname,
                             @JsonProperty("desc") final String desc,
                             @JsonProperty("sig") final String sig,
-                            @JsonProperty("excs") final String[] excs) {
+                            @JsonProperty("excs") final String[] excs,
+                            @JsonProperty("anns") final List<Annotation> anns,
+                            @JsonProperty("paramAnns") final List<List<Annotation>> paramAnns) {
             this.acc = acc;
             this.cname = cname;
             this.fname = fname;
             this.desc = desc;
             this.sig = sig;
             this.excs = excs;
+            this.anns = anns;
+            this.paramAnns = paramAnns;
         }
 
         public int getAcc() {
@@ -397,6 +415,14 @@ public abstract class Asm {
 
         public String[] getExcs() {
             return excs;
+        }
+
+        public List<Annotation> getAnns() {
+            return anns;
+        }
+
+        public List<List<Annotation>> getParamAnns() {
+            return paramAnns;
         }
     }
 
@@ -1055,6 +1081,115 @@ public abstract class Asm {
 
         public int getN() {
             return n;
+        }
+    }
+
+    @ToString
+    public static class Annotation extends Asm {
+        private final String name;
+        private final List<AnnotationProperty> properties;
+
+        public Annotation(@JsonProperty("name") final String name,
+                          @JsonProperty("props") final List<AnnotationProperty> properties) {
+            this.name = name;
+            this.properties = properties;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<AnnotationProperty> getProperties() {
+            return properties;
+        }
+    }
+
+    @ToString
+    public static class AnnotationProperty {
+        private final String name;
+        private final AnnotationValue value;
+
+        public AnnotationProperty(@JsonProperty("name") final String name,
+                                  @JsonProperty("value") final AnnotationValue value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public AnnotationValue getValue() {
+            return value;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    @JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type",
+        visible = true)
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = AnnotationValue.AnnString.class, name = "AnnString"),
+        @JsonSubTypes.Type(value = AnnotationValue.AnnInt.class, name = "AnnInt"),
+        @JsonSubTypes.Type(value = AnnotationValue.AnnArray.class, name = "AnnArray")
+    })
+    public static abstract class AnnotationValue {
+        private AnnotationValueType type;
+
+        private AnnotationValue() {}
+
+        public AnnotationValueType getType() {
+            return type;
+        }
+
+        public void setType(final AnnotationValueType type) {
+            this.type = type;
+        }
+
+        public enum AnnotationValueType {
+            AnnString,
+            AnnInt,
+            AnnArray
+        }
+
+        @ToString
+        public static class AnnString extends AnnotationValue {
+            private final String value;
+
+            public AnnString(@JsonProperty("value") final String value) {
+                this.value = value;
+            }
+
+            public String getValue() {
+                return value;
+            }
+        }
+
+        @ToString
+        public static class AnnInt extends AnnotationValue {
+            private final int value;
+
+            public AnnInt(@JsonProperty("value") final int value) {
+                this.value = value;
+            }
+
+            public int getValue() {
+                return value;
+            }
+        }
+
+        @ToString
+        public static class AnnArray extends AnnotationValue {
+            private final List<AnnotationValue> values;
+
+            public AnnArray(@JsonProperty("values") final List<AnnotationValue> values) {
+                this.values = values;
+            }
+
+            public List<AnnotationValue> getValues() {
+                return values;
+            }
         }
     }
 }
