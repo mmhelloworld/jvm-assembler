@@ -1,6 +1,9 @@
 package com.mmhelloworld.jvmassembler.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mmhelloworld.jvmassembler.server.Asm.AnnotationValue;
+import com.mmhelloworld.jvmassembler.server.Asm.AnnotationValue.AnnotationValueType;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
@@ -21,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
@@ -136,14 +140,7 @@ public class AssemblerResource {
                         mv.visitTypeInsn(CHECKCAST, checkcast.getDesc());
                         break;
                     case ClassCodeStart:
-                        Asm.ClassCodeStart classCodeStart = (Asm.ClassCodeStart) asm;
-                        cw.visit(classCodeStart.getVersion(),
-                            classCodeStart.getAcc(),
-                            classCodeStart.getName(),
-                            classCodeStart.getSig(),
-                            classCodeStart.getParent(),
-                            classCodeStart.getInterfaces());
-                        cws.put(classCodeStart.getName(), cw);
+                        handleClassCodeStart(cws, cw, (Asm.ClassCodeStart) asm);
                         break;
                     case ClassCodeEnd:
                         cw.visitEnd();
@@ -190,12 +187,14 @@ public class AssemblerResource {
                             createDefaultConstructor(classWriter);
                             return classWriter;
                         });
+                        List<Asm.Annotation> anns = createMethod.getAnns();
                         mv = cw.visitMethod(
                             createMethod.getAcc(),
                             createMethod.getFname(),
                             createMethod.getDesc(),
                             createMethod.getSig(),
                             createMethod.getExcs());
+                        handleCreateMethod(mv, createMethod);
                         break;
                     case Dadd:
                         mv.visitInsn(DADD);
@@ -391,7 +390,7 @@ public class AssemblerResource {
                         mv.visitLdcInsn(((Asm.LdcString) asm).getVal());
                         break;
                     case LdcType:
-                        mv.visitLdcInsn(Type.getType(((Asm.LdcType)asm).getVal()));
+                        mv.visitLdcInsn(Type.getType(((Asm.LdcType) asm).getVal()));
                         break;
                     case Ldiv:
                         mv.visitInsn(LDIV);
@@ -462,6 +461,48 @@ public class AssemblerResource {
             error = e.getMessage();
         }
         return new AssemblerResponse(isSuccess, error);
+    }
+
+    private void handleCreateMethod(final MethodVisitor mv, final Asm.CreateMethod createMethod) {
+        createMethod.getAnns().forEach(annotation -> {
+            final AnnotationVisitor av = mv.visitAnnotation(annotation.getName(), true);
+            annotation.getProperties().forEach(prop -> addPropertyToAnnotation(av, prop));
+        });
+    }
+
+    private void handleClassCodeStart(final Map<String, ClassWriter> cws,
+                                      final ClassWriter cw,
+                                      final Asm.ClassCodeStart classCodeStart) {
+        cw.visit(classCodeStart.getVersion(),
+            classCodeStart.getAcc(),
+            classCodeStart.getName(),
+            classCodeStart.getSig(),
+            classCodeStart.getParent(),
+            classCodeStart.getInterfaces());
+        cws.put(classCodeStart.getName(), cw);
+
+        final List<Asm.Annotation> annotations = classCodeStart.getAnnotations();
+        annotations.forEach(annotation -> {
+            AnnotationVisitor av = cw.visitAnnotation(annotation.getName(), true);
+            annotation.getProperties().forEach(prop -> addPropertyToAnnotation(av, prop));
+            av.visitEnd();
+        });
+    }
+
+    private void addPropertyToAnnotation(final AnnotationVisitor av, final Asm.AnnotationProperty prop) {
+        final AnnotationValueType propType = prop.getValue().getType();
+        switch (propType) {
+            case AnnString:
+                AnnotationValue.AnnString annStr = (AnnotationValue.AnnString) prop.getValue();
+                av.visit(prop.getName(), annStr.getValue());
+                break;
+            case AnnInt:
+                AnnotationValue.AnnInt annInt = (AnnotationValue.AnnInt) prop.getValue();
+                av.visit(prop.getName(), annInt.getValue());
+                break;
+            case AnnArray:
+                break;
+        }
     }
 
     private MethodVisitor createDefaultConstructor(final ClassWriter cw) {
