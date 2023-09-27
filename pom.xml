@@ -15,7 +15,7 @@
     <properties>
         <jersey.version>2.23.2</jersey.version>
         <jackson.version>2.9.5</jackson.version>
-        <jetty.version>9.4.17.v20190418</jetty.version>
+        <jetty.version>9.4.51.v20230217</jetty.version>
         <asm.version>5.1</asm.version>
         <joptsimple.version>5.0.2</joptsimple.version>
         <lombok.version>1.16.12</lombok.version>
