@@ -13,10 +13,14 @@
     <packaging>pom</packaging>
 
     <properties>
-        <jersey.version>2.23.2</jersey.version>
-        <jackson.version>2.9.5</jackson.version>
-        <jetty.version>9.4.51.v20230217</jetty.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <asm.version>5.1</asm.version>
+        <jackson.version>2.19.2</jackson.version>
+        <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
+        <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
+        <jersey.version>3.1.0</jersey.version>
+        <jetty.version>12.0.23</jetty.version>
         <joptsimple.version>5.0.2</joptsimple.version>
         <lombok.version>1.16.12</lombok.version>
     </properties>
@@ -72,14 +76,20 @@
             </dependency>
 
             <dependency>
+                <groupId>org.glassfish.jersey.inject</groupId>
+                <artifactId>jersey-hk2</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-servlet</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
 
@@ -93,6 +103,18 @@
                 <groupId>net.sf.jopt-simple</groupId>
                 <artifactId>jopt-simple</artifactId>
                 <version>${joptsimple.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jakarta.ws.rs</groupId>
+                <artifactId>jakarta.ws.rs-api</artifactId>
+                <version>${jakarta.ws.rs-api.version}</version>
             </dependency>
 
             <dependency>

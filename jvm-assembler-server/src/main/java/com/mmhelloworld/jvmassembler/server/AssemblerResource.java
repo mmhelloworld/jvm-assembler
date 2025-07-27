@@ -1,8 +1,13 @@
 package com.mmhelloworld.jvmassembler.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mmhelloworld.jvmassembler.server.Asm.AnnotationValue;
 import com.mmhelloworld.jvmassembler.server.Asm.AnnotationValue.AnnotationValueType;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
@@ -12,13 +17,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -27,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.AALOAD;
 import static org.objectweb.asm.Opcodes.AASTORE;
@@ -97,9 +96,9 @@ public class AssemblerResource {
 
     @POST
     @Path("/assemble")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public AssemblerResponse assemble(CreateBytecode request) throws JsonProcessingException {
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    public AssemblerResponse assemble(CreateBytecode request) {
         Map<String, ClassWriter> cws = new HashMap<>();
         ClassWriter cw = null;
         MethodVisitor mv = null;
@@ -187,7 +186,6 @@ public class AssemblerResource {
                             createDefaultConstructor(classWriter);
                             return classWriter;
                         });
-                        List<Asm.Annotation> anns = createMethod.getAnns();
                         mv = cw.visitMethod(
                             createMethod.getAcc(),
                             createMethod.getFname(),
@@ -464,10 +462,13 @@ public class AssemblerResource {
     }
 
     private void handleCreateMethod(final MethodVisitor mv, final Asm.CreateMethod createMethod) {
-        createMethod.getAnns().forEach(annotation -> {
-            final AnnotationVisitor av = mv.visitAnnotation(annotation.getName(), true);
-            annotation.getProperties().forEach(prop -> addPropertyToAnnotation(av, prop));
-        });
+        List<Asm.Annotation> anns = createMethod.getAnns();
+        if (anns != null) {
+            anns.forEach(annotation -> {
+                final AnnotationVisitor av = mv.visitAnnotation(annotation.getName(), true);
+                annotation.getProperties().forEach(prop -> addPropertyToAnnotation(av, prop));
+            });
+        }
     }
 
     private void handleClassCodeStart(final Map<String, ClassWriter> cws,
@@ -482,11 +483,13 @@ public class AssemblerResource {
         cws.put(classCodeStart.getName(), cw);
 
         final List<Asm.Annotation> annotations = classCodeStart.getAnnotations();
-        annotations.forEach(annotation -> {
-            AnnotationVisitor av = cw.visitAnnotation(annotation.getName(), true);
-            annotation.getProperties().forEach(prop -> addPropertyToAnnotation(av, prop));
-            av.visitEnd();
-        });
+        if (annotations != null) {
+            annotations.forEach(annotation -> {
+                AnnotationVisitor av = cw.visitAnnotation(annotation.getName(), true);
+                annotation.getProperties().forEach(prop -> addPropertyToAnnotation(av, prop));
+                av.visitEnd();
+            });
+        }
     }
 
     private void addPropertyToAnnotation(final AnnotationVisitor av, final Asm.AnnotationProperty prop) {

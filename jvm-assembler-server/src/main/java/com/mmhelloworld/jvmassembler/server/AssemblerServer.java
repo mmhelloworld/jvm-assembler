@@ -6,8 +6,8 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import java.io.BufferedWriter;
@@ -37,7 +37,7 @@ public final class AssemblerServer {
 
         ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
         jerseyServlet.setInitOrder(0);
-        jerseyServlet.setInitParameter("javax.ws.rs.Application", AssemblerApp.class.getCanonicalName());
+        jerseyServlet.setInitParameter("jakarta.ws.rs.Application", AssemblerApp.class.getCanonicalName());
 
         Server jettyServer = new Server(port);
         jettyServer.setHandler(context);
